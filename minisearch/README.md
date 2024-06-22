@@ -1,5 +1,6 @@
 ## Running Elastic Search with Docker. This will download the docker image and run elastic searhch
 Running ElasticSearch:
+
 ```
 docker run -it \
     --rm \
@@ -9,8 +10,9 @@ docker run -it \
     -e "discovery.type=single-node" \
     -e "xpack.security.enabled=false" \
     docker.elastic.co/elasticsearch/elasticsearch:8.4.3
-    ```
+```
 Index settings:
+
 ```
 {
     "settings": {
@@ -27,6 +29,7 @@ Index settings:
     }
 }
 ```
+
 Query:
 
 ```
@@ -49,4 +52,5 @@ Query:
         }
     }
 }
+
 ```
