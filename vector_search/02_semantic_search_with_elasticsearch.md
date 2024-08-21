@@ -31,3 +31,17 @@ A document is a collection of fields with their associated values. Each document
 An index is a collection of documents that is stored in a highly optimized format designed to perform efficient searches. Indexes are similar to tables in a relational database, but they are more flexible and can store complex data structures.
 
 To work with Elasticsearch, you need to organize your data into documents and then add all your documents to an index. This allows Elasticsearch to efficiently search and retrieve relevant documents based on the search queries.
+
+
+# Implementing Semantic Search in Elasticsearch
+## 1. Setting Up Elasticsearch
+First, ensure that you have Elasticsearch up and running. You can use the official Docker image to set up Elasticsearch:
+docker run -it \
+    --rm \
+    --name elasticsearch \
+    -p 9200:9200 \
+    -p 9300:9300 \
+    -e "discovery.type=single-node" \
+    -e "xpack.security.enabled=false" \
+    docker.elastic.co/elasticsearch/elasticsearch:8.4.3
+
