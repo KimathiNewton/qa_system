@@ -1,7 +1,4 @@
----
-noteId: "a4d744b0558411efb3364d10f2ca1c8d"
-tags: []
+# Semantic Search with Elasticsearch
+Elasticsearch, is a powerful open-source search engine, that has been used for full-text search, analytics, and data visualization. Traditionally, Elasticsearch has been known for its ability to perform keyword-based search, where documents are matched based on exact or partial keyword matches. However, Elasticsearch has evolved to support semantic search—an approach that focuses on understanding the meaning behind words and phrases, rather than just matching keywords.
 
----
-
-We will explore on how to build a semantic search engine using Elasticsearch. Semantic search using Elasticsearch is a specific implementation of vector search that leverages Elasticsearch's capabilities to perform semantic search. It enhances traditional search by understanding the context and meaning behind the search terms, going beyond keyword matching to deliver more relevant results.
+Semantic search in Elasticsearch enables more intuitive and context-aware search experiences, making it possible to find relevant information even when the exact keywords are not present in the query. This article will explore how semantic search can be implemented in Elasticsearch, its benefits, and practical use cases.
