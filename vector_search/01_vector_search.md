@@ -29,7 +29,7 @@ The choice of metric depends on the specific application and the nature of the d
 
 When a query is made, it is also converted into a vector.The query vector is compared with the indexed vectors using similarity measures like cosine similarity or Euclidean distance.The most similar items are retrieved and presented as search results.
 
-![Vector Search Representation](./images/vector-database.png)
+![Vector Search Representation](vector-database.png)
 
 ## Indexing and Search
 Efficient storage and retrieval of data are critical for vector databases. Indexing methods ensure that data is managed optimally, allowing for fast and accurate searches. Different indexing techniques are used to achieve this efficiency.
@@ -38,7 +38,7 @@ Efficient storage and retrieval of data are critical for vector databases. Index
 * Natural Language Processing (NLP): Embeddings are widely used in NLP tasks such as text classification, sentiment analysis, and machine translation.
 * Search and Information Retrieval: Embeddings enable semantic search, where the search system understands the context and meaning behind queries to return more relevant results.
 * Recommendation Systems: Embeddings help in finding similar items, such as products or content, based on user preferences.
-
+"
 By leveraging embeddings, we can build more intelligent and context-aware systems that go beyond simple keyword matching to understand the deeper meaning of the data.
 
 
