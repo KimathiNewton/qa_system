@@ -35,7 +35,8 @@ To work with Elasticsearch, you need to organize your data into documents and th
 
 # Implementing Semantic Search in Elasticsearch
 ## 1. Setting Up Elasticsearch
-First, ensure that you have Elasticsearch up and running. You can use the official Docker image to set up Elasticsearch:
+First, ensure that you have Elasticsearch up and running.You can do this by starting a Docker container for Elasticsearch, to connect to elasticsearch remotely:
+```
 docker run -it \
     --rm \
     --name elasticsearch \
@@ -45,3 +46,31 @@ docker run -it \
     -e "xpack.security.enabled=false" \
     docker.elastic.co/elasticsearch/elasticsearch:8.4.3
 
+```
+
+## 2 Data Loading and Preprocessing
+In this step, we will load the documents.json file and preprocess it to flatten the hierarchy, making it suitable for Elasticsearch. The documents.json file contains a list of courses, each with a list of documents. We will extract each document and add a course field to it, indicating which course it belongs to.
+```
+import json
+
+with open('documents.json', 'rt') as f_in:
+    docs_raw = json.load(f_in)
+
+```
+Elasticsearch requires to have everything on the same level of hierachry, in this case we have two levels, course and documents
+```
+documents = []
+
+for course_dict in docs_raw:
+    for doc in course_dict['documents']:
+        doc['course'] = course_dict['course']
+        documents.append(doc)
+
+documents[1]
+#Output
+{'text': 'GitHub - DataTalksClub data-engineering-zoomcamp#prerequisites',
+ 'section': 'General course-related questions',
+ 'question': 'Course - What are the prerequisites for this course?',
+ 'course': 'data-engineering-zoomcamp'}
+
+```
