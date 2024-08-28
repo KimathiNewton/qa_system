@@ -74,3 +74,23 @@ documents[1]
  'course': 'data-engineering-zoomcamp'}
 
 ```
+## 3 Create Embeddings Using Pretrained Models
+To perform semantic search, we need to convert our documents into dense vectors (embeddings) that capture the semantic meaning of the text. We will use a pre-trained model from the Sentence Transformers library to generate these embeddings. These embeddings are then indexed into Elasticsearch. These embeddings enable us to perform semantic search, where the goal is to find text that is contextually similar to a given query.
+
+The text and question fields are the actual data fields containing the primary information, whereas other fields like section and course are more categorical and less informative for the purpose of creating meaningful embeddings.
+
+* Install the sentence_transformers library.
+* Load the pre-trained model and use it to generate embeddings for our documents.
+```
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer("all-mpnet-base-v2")
+
+#created the dense vector using the pre-trained model
+operations = []
+for doc in documents:
+    # Transforming the title into an embedding using the model
+    doc["text_vector"] = model.encode(doc["text"]).tolist()
+    operations.append(doc)
+
+
+```
