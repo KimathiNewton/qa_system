@@ -94,3 +94,14 @@ for doc in documents:
 
 
 ```
+## 4 Connecting to Elasticsearch
+In this step, we will set up a connection to an Elasticsearch instance. Make sure you have Elasticsearch running.
+```
+from elasticsearch import Elasticsearch
+
+# Connect to the Elasticsearch instance
+es_client = Elasticsearch('http://localhost:9200')
+
+# Check the connection
+print(es_client.info())
+```
