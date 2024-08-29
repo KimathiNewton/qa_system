@@ -105,3 +105,106 @@ es_client = Elasticsearch('http://localhost:9200')
 # Check the connection
 print(es_client.info())
 ```
+## 5 Create Mappings and Index
+We will define the mappings and create the index in Elasticsearch, where the generated embeddings will also be stored.
+
+Mapping is the process of specifying how documents and their fields are structured and indexed in Elasticsearch. Each document is composed of various fields, each assigned a specific data type.
+
+Similar to a database schema, mapping outlines the structure of documents, detailing the fields, their data types (e.g., string, integer, or date), and how these fields should be indexed and stored.
+
+By defining documents and indices, we ensure that an index acts like a table of contents in a book, facilitating efficient searches.
+```
+index_settings = {
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+    "mappings": {
+        "properties": {
+            "text": {"type": "text"},
+            "section": {"type": "text"},
+            "question": {"type": "text"},
+            "course": {"type": "keyword"},
+            "text_vector": {"type": "dense_vector", "dims": 768, "index": True, "similarity": "cosine"},
+        }
+    }
+}
+
+index_name = "course-questions"
+
+# Delete the index if it exists
+es_client.indices.delete(index=index_name, ignore_unavailable=True)
+
+# Create the index
+es_client.indices.create(index=index_name, body=index_settings)
+```
+## 6 Adding Documents to the Index
+We then add the preprocessed documents along with their embeddings to the Elasticsearch index. This allows Elasticsearch to store and manage the documents efficiently, enabling fast and accurate search queries.
+```
+for doc in operations:
+    try:
+        es_client.index(index=index_name, document=doc)
+    except Exception as e:
+        print(e)
+```
+## 7 Querying the Search Engine
+When a user inputs a search query, it is converted into embeddings and searched within the Elasticsearch index. The results are scored based on their relevance to the query.
+```
+search_term = "windows or mac?"
+vector_search_term = model.encode(search_term)
+
+query = {
+    "field": "text_vector",
+    "query_vector": vector_search_term,
+    "k": 5,
+    "num_candidates": 10000, 
+}
+
+res = es_client.search(index=index_name, knn=query, source=["text", "section", "question", "course"])
+res["hits"]["hits"]
+```
+## Perform Keyword Search & Advanced Search(Filtering the results)
+Anytime you are directly using the users input and passing that information into your search function, that becomes a keyword seard.
+```
+response = es_client.search(
+    index=index_name,
+    query={
+        "bool": {
+            "must": {
+             "multi_match": 
+                        {"query": "windows or python?", 
+                         "fields": ["text", "question","course","title"],
+                         "type": "best_fields"
+                        }
+                    },
+            "filter": {
+                "term": {
+                        "course": "data-engineering-zoomcamp"
+            }
+        }
+        }
+    }
+)
+```
+## Perfoming Semantic Search and Advanced Search
+In order for elasticsearch to perfom semantic search, we should pass the information we receive from the end user and convert it into a vector embedding and that vector embedding is the one that is passed into the search function.
+```
+knn_query= {
+    "field": "text_vector",
+    "query_vector":vector_search_term,
+    "k": 5,
+    "num_candidates" : 10000
+}
+response=es_client.search(index=index_name,
+                          query={
+                              "match": {
+                                  "course": "data-engineering-zoomcamp"
+                              },
+                          },
+                           knn=knn_query,
+                          size=5,
+                          explain=True
+                         )      
+                            
+
+```
