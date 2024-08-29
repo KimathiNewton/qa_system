@@ -208,3 +208,14 @@ response=es_client.search(index=index_name,
                             
 
 ```
+Here's a brief look at the main steps:
+
+Convert the search term received from the end user into a vector embedding.
+* Pass this vector embedding into the advanced semantic search function.
+* Restrict the results to a specific section, in this case, "General course-related questions". Similarly, it can be restricted to a specific course say "Data Engineering Zoom Camp."
+One notable difference between basic and advanced semantic search lies in the scoring of results. Basic semantic search scores range between 0 and 1, where 0 indicates a poor match and 1 indicates an excellent match. In contrast, advanced semantic search scores can exceed 1. This variation can be perplexing, but it is crucial to validate the results for their relevance rather than focusing solely on the score range.
+
+Explaining Scores with Explain Keyword
+To further understand score calculations, Elasticsearch provides the explain=true keyword. This tool elucidates how scores are computed, offering valuable insights. Armed with this information, one can develop custom scoring functions that align better with specific user or business needs.
+
+In the next chapter, we will explore how to evaluate retrieval performance. 
