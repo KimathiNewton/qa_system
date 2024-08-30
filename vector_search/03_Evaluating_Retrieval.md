@@ -22,9 +22,94 @@ Here are the main points:
 ## Gold Standard Data Sets
 A critical aspect of evaluation is the use of gold standard data sets. These are ground truth data sets where the relevant documents for each query are known. For instance, given a query like "Can I still join the course?", the relevant documents would be pre-identified. This allows for a clear benchmark to assess the performance of different retrieval methods.
 
-Generating Ground Truth Data
+## Generating Ground Truth Data
 To check if a search system is working well, we need a set of good examples of questions and their correct answers. This helps us see if the system finds the right answers.
 
 Typically, we have many queries and their corresponding relevant documents or one query has multiple relevant documents, helping to measure the accuracy of search results.
 
 For practical purposes, we generate a data set where each query has one relevant document. This simplification helps in experimenting with and evaluating different retrieval techniques.
+
+## Preparing the documents
+### Generating Stable IDs for Documents
+To accurately track relevant documents, each document is assigned a unique ID. By maintaining consistent IDs, we can manage changes and updates to the document set without affecting the evaluation process. This helps know which answer goes with which question.
+
+Here are the steps to generate stable IDs:
+
+1. Concatenate Document Attributes: Combine key attributes of the document (e.g., course name, question, and a portion of the text) into a single string. This ensures that the ID is unique to the specific content of the document.
+2. Generate MD5 Hash: Use the MD5 hashing algorithm to create a hash from the concatenated string. MD5 is chosen for its balance of speed and uniqueness.
+3. Extract a Substring of the Hash: To keep the ID concise, extract a substring (e.g., the first 8 characters) of the MD5 hash. This substring serves as the document's unique ID.
+4. Assign the ID to the Document: Attach the generated ID to the document. This ID will be used to reference the document in the evaluation process.
+
+### Human Annotation
+In production systems, human annotators and domain experts review documents and queries to identify relevant document-query pairs. Although this method is time-consuming, it results in high-quality data, often referred to as "gold standard" data. Observing user interactions and evaluating system responses also contribute to refining the data set.
+
+### Using Large Language Models (LLMs)
+LLMs can be used to generate user queries based on FAQ records. By creating multiple questions for each FAQ record, we ensure that the generated questions are varied and relevant. This automated approach speeds up the process of creating a ground truth data set and is suitable for initial experiments before deploying a production system.
+
+```
+prompt_template = """
+You emulate a student who's taking our course.
+Formulate 5 questions this student might ask based on a FAQ record. The record
+should contain the answer to the questions, and the questions should be complete and not too short.
+If possible, use as fewer words as possible from the record. 
+
+The record:
+
+section: {section}
+question: {question}
+answer: {text}
+
+Provide the output in parsable JSON without using code blocks:
+
+["question1", "question2", ..., "question5"]
+""".strip()
+```
+### Creating the Ground Truth Dataset
+We send the generated prompt to OpenAI's API and receive a JSON response containing the generated questions. These responses are stored in a dictionary with the document ID as the key. The parsed JSON responses are then processed to extract the questions and associate them with their respective courses and document IDs. This structured data is saved in a CSV file for further analysis. The CSV file format makes it easy to manipulate and use the data in various evaluation tools and techniques.
+
+### Evaluation Metrics
+Using the generated data set, we can evaluate different search systems by computing metrics such as Hit Rate and Mean Reciprocal Rank (MRR). These metrics help us understand how well the search system retrieves relevant documents and identify areas for improvement.
+
+* Hit Rate: measures how often the search system manages to find a relevant document for a query. For example, if you have 10 queries and the search system finds a relevant document for 8 of those queries, the Hit Rate is 8/10 or 80%.
+
+* MRR: Let's break it down
+
+Reciprocal Rank is the inverse of the rank at which the first relevant document is found. For example, if the first relevant document is found at rank 1, the reciprocal rank is 1/1 = 1. If it’s found at rank 2, the reciprocal rank is 1/2 = 0.5, at rank 3 it is 1/3 ≈ 0.33, and so on.
+
+So Mean Reciprocal Rank is the average of the reciprocal ranks across multiple queries. It evaluates the rank position of the first relevant document across different queries. For example, if you have three queries and their reciprocal ranks are 1, 0.5, and 0.33, the MRR would be (1 + 0.5 + 0.33) / 3 ≈ 0.61.
+
+More info on metrics: https://github.com/DataTalksClub/llm-zoomcamp/blob/main/03-vector-search/eval/evaluation-metrics.md
+
+## Evaluating Text Search Overview
+We assess the performance of Elastic Search and Min Search.
+
+For Elastic Search we:
+
+* Load documents from a JSON file (documents-with-ids.json) and initializes an Elastic Search client connected to a local instance.
+
+* Define the settings and mappings for Elastic Search index. The loaded documents are then indexed into Elastic Search.
+```
+index_settings = {
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+    "mappings": {
+        "properties": {
+            "text": {"type": "text"},
+            "section": {"type": "text"},
+            "question": {"type": "text"},
+            "course": {"type": "keyword"},
+            "id": {"type": "keyword"},
+        }
+    }
+}
+
+index_name = "course-questions"
+
+es_client.indices.delete(index=index_name, ignore_unavailable=True)
+es_client.indices.create(index=index_name, body=index_settings)
+
+for doc in tqdm(documents):
+    es_client.index(index=index_name, document=doc)
+```
